@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
+
+func concurrente(w http.ResponseWriter, nombre []string) {
+	for i := 0; i < len(nombre); i++ {
+		io.WriteString(w, "El individuo "+nombre[i]+" esta comiendo")
+		fmt.Fprintf(w, "\n")
+		fmt.Println("El individuo " + nombre[i] + " esta comiendo")
+		time.Sleep(time.Millisecond * 2000)
+	}
+}
 
 func main() {
 	//arreglo
@@ -25,10 +35,20 @@ func main() {
 		registro := len(nombre)
 		nombre = append(nombre, eleccion)
 		fmt.Println("Nombre agregado: " + eleccion)
+		time.Sleep(8 * time.Second)
 		io.WriteString(w, "El dato agregado fue: "+nombre[registro])
-
 	})
+	http.HandleFunc("/comer", func(w http.ResponseWriter, r *http.Request) {
+		for i := 0; i < len(nombre); i++ {
+			io.WriteString(w, "El individuo "+nombre[i]+" esta comiendo")
+			fmt.Fprintf(w, "\n")
+			time.Sleep(8 * time.Second)
+		}
+		go concurrente(w, nombre)
+	})
+
 	//consola
 	fmt.Println("El servidor escucha en el puerto 8080")
 	http.ListenAndServe(":8080", nil)
 }
+
